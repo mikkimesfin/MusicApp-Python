@@ -26,7 +26,11 @@ def resource(song_id):
         song = get_single_song(song_id)
         return json.dumps(song)
     elif request.method == 'PUT':
-        pass  # Handle UPDATE request
+        # Handle UPDATE request
+        data = request.form
+        result = edit_song(
+            song_id, data['artist'], data['title'], data['rating'])
+        return jsonify(result)
     elif request.method == 'DELETE':
         pass  # Handle DELETE request
 
@@ -57,6 +61,15 @@ def get_single_song(song_id):
         cursor.execute("SELECT * FROM songs WHERE id = ?", (song_id,))
         song = cursor.fetchone()
         return song
+def edit_song(song_id, artist, title, rating):
+    try:
+        with sqlite3.connect('songs.db') as connection:
+            connection.execute("UPDATE songs SET artist = ?, title = ?, rating = ? WHERE ID = ?;", (artist, title, rating, song_id,))
+            result = {'status': 1, 'message': 'SONG Edited'}
+    except:
+        result = {'status': 0, 'message': 'Error'}
+    return result
+
 if __name__ == '__main__':
     app.debug = True
     app.run()
